@@ -5,11 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class Day12Exercise1 {
+public class Day12Exercise2 {
 
   public static void main(String[] args) {
-    String input =              "abacccaaaacccccccccccaaaaaacccccaaaaaaccccaaacccccccccccccccccccccccccccccccccccccccccccaaaaa\r\n"
+    String input = "abacccaaaacccccccccccaaaaaacccccaaaaaaccccaaacccccccccccccccccccccccccccccccccccccccccccaaaaa\r\n"
         + "abaaccaaaacccccccccccaaaaaaccccccaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccaaaaa\r\n"
         + "abaaccaaaacccccccccccaaaaacccccaaaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccaaaaa\r\n"
         + "abccccccccccccccccccccaaaaacccaaaaaaaaaaaaaaaacccccccccccccccccccccccccccaaaccccccccccccaaaaa\r\n"
@@ -73,15 +74,23 @@ public class Day12Exercise1 {
     }
 
     Graph<Point> pointGraph = new Graph<>(points, getConnections(points));
-    
+
     RouteFinder<Point> finder = new RouteFinder<>(pointGraph, new PointToPointScorer(), new PointToPointScorer());
 
-    List<Point> route = finder.findRoute(start, target);
-    for (Point point : route) {
-      System.out.print(point.getId() + " ---> ");
+    int score = Integer.MAX_VALUE;
+    List<Point> pointsWithA = points.stream().filter(it -> it.elevation == 'a').collect(Collectors.toList());
+
+    for (Point point : pointsWithA) {
+      try {
+        List<Point> route = finder.findRoute(point, target);
+        if (route.size() - 1 < score) {
+          score = route.size() - 1;
+        }
+      } catch (IllegalStateException e) {
+        System.out.println("No route found from " + point.getId());
+      }
     }
-    System.out.println("");
-    System.out.println(">>>>>>>" + (route.size() - 1));
+    System.out.println(score);
   }
 
   public static Map<String, Set<String>> getConnections(Set<Point> points) {
