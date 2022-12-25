@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Day23Exercise1 {
+public class Day23Exercise2 {
 
 	public static List<Elve> elves = new ArrayList<>();
 
@@ -20,9 +20,9 @@ public class Day23Exercise1 {
 
 		int direction = 1;
 
-		print();
-
-		for (int a = 0; a < 10; a++) {
+		int a = 0;
+		boolean end = false;
+		do {
 
 			List<Elve> elvesToMove = elves.stream().filter(it -> hasElvesArround(it)).collect(Collectors.toList());
 			for (Elve e : elvesToMove) {
@@ -35,51 +35,16 @@ public class Day23Exercise1 {
 			movingElves.forEach(it -> it.doMove());
 			notMovingElves.forEach(it -> it.doNotMove());
 
+			a++;
+			end = movingElves.size() == 0;
+
 			direction++;
 			if (direction == 5) {
 				direction = 1;
 			}
-			System.out.println("End of round " + (a + 1));
-			print();
-		}
+		} while (!end);
 
-		int smallestX = elves.stream().mapToInt(it -> it.x).min().getAsInt();
-		int smallestY = elves.stream().mapToInt(it -> it.y).min().getAsInt();
-		int largestX = elves.stream().mapToInt(it -> it.x).max().getAsInt();
-		int largestY = elves.stream().mapToInt(it -> it.y).max().getAsInt();
-
-		System.out.println(largestX);
-		System.out.println(smallestX);
-		System.out.println();
-		System.out.println(largestY);
-		System.out.println(smallestY);
-		System.out.println();
-		System.out.println((largestY - smallestY));
-		System.out.println((largestX - smallestX));
-		int rec = ((largestY - smallestY) + 1) * ((largestX - smallestX) + 1);
-		System.out.println(rec - elves.size());
-
-	}
-
-	public static void print() {
-		int smallestX = elves.stream().mapToInt(it -> it.x).min().getAsInt();
-		int smallestY = elves.stream().mapToInt(it -> it.y).min().getAsInt();
-		int largestX = elves.stream().mapToInt(it -> it.x).max().getAsInt();
-		int largestY = elves.stream().mapToInt(it -> it.y).max().getAsInt();
-		for (int i = smallestY; i <= largestY; i++) {
-			for (int x = smallestX; x <= largestX; x++) {
-				final int a = x;
-				final int b = i;
-				if (elves.stream().anyMatch(it -> it.x == a && it.y == b)) {
-					System.out.print("#");
-				} else {
-					System.out.print(".");
-				}
-			}
-			System.out.println();
-		}
-		System.out.println();
-		System.out.println();
+		System.out.println("No elve moved in round: " + a);
 	}
 
 	private static boolean isOnSamePlace(Elve it) {
