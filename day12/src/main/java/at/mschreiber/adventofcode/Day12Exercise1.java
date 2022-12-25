@@ -9,7 +9,8 @@ import java.util.Set;
 public class Day12Exercise1 {
 
   public static void main(String[] args) {
-    String input =              "abacccaaaacccccccccccaaaaaacccccaaaaaaccccaaacccccccccccccccccccccccccccccccccccccccccccaaaaa\r\n"
+    String input =
+          "abacccaaaacccccccccccaaaaaacccccaaaaaaccccaaacccccccccccccccccccccccccccccccccccccccccccaaaaa\r\n"
         + "abaaccaaaacccccccccccaaaaaaccccccaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccaaaaa\r\n"
         + "abaaccaaaacccccccccccaaaaacccccaaaaaaaaaaaaaaaccccccccccccccccccccccccccccccccccccccccccaaaaa\r\n"
         + "abccccccccccccccccccccaaaaacccaaaaaaaaaaaaaaaacccccccccccccccccccccccccccaaaccccccccccccaaaaa\r\n"
@@ -81,6 +82,18 @@ public class Day12Exercise1 {
       System.out.print(point.getId() + " ---> ");
     }
     System.out.println("");
+    for (int i = 0; i < lines.length; i++) {
+      for (int j = 0; j < lines[i].length(); j++) {
+        final int y = i;
+        final int x = j;
+        if (route.stream().filter(it -> it.x == x && it.y == y).count() == 1) {
+          System.out.print("X");
+        } else {
+          System.out.print(" ");
+        }
+      }
+      System.out.println("");
+    }
     System.out.println(">>>>>>>" + (route.size() - 1));
   }
 
