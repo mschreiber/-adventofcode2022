@@ -1,10 +1,10 @@
 package at.mschreiber.adventofcode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class BeaconMap2 {
 
@@ -12,13 +12,33 @@ public class BeaconMap2 {
 
   int currentX = 0;
   int currentY = 0;
-  
+
+  static final int MAX_Y = 4000000;
+
   public List<Sensors> sensors = new ArrayList<BeaconMap2.Sensors>();
 
   class Sensors {
     public int x, y, range;
+
+    public Range getRangeForAbsoluteY(int absY) {
+      if (absY > (y - range) && absY < (y + range)) {
+        int minX = x - (range - Math.abs(y - absY));
+        int maxX = x + (range - Math.abs(y - absY));
+        return new Range(Math.max(0,  minX), Math.min(MAX_Y, maxX));
+      }
+      return new Range(-1, -1);
+    }
   }
-  
+
+  class Range {
+    int minX, maxX;
+
+    public Range(int minX, int maxX) {
+      this.minX = minX;
+      this.maxX = maxX;
+    }
+
+  }
 
   public void putSensorAndBeacon(int xS, int yS, int xB, int yB) {
     if (!entries.containsKey(yS)) {
@@ -39,37 +59,50 @@ public class BeaconMap2 {
     sensors.add(b);
   }
 
+  public List<Range> getOverlappingRanges(List<Range> allRanges, Range it) {
+    List<Range> matchRanges = new ArrayList<>();
+    for (Range range : allRanges) {
+     if ((it.minX <= range.minX && it.maxX >= range.minX - 1) || 
+         (it.minX >= range.minX && it.maxX <= range.maxX) ||
+         (it.minX >= range.minX + 1 && it.minX <= range.maxX)) {
+       matchRanges.add(range);
+     }
+    }
+    return matchRanges;
+  }
   
   public void findEmptySpot() {
-    char[] entries = new char[4000000];
-    for (int y = 85000; y < 4000000; y++) {
-      System.out.println("Scanning " + y);
-      for (Sensors sensor : sensors) {
-        int xes = sensor.range - Math.abs(y - sensor.y);
-        
-        for (int a = 0; a <=xes; a++) {
-          if ((sensor.x - a) >= 0 && (sensor.x - a) < 4000000) entries[sensor.x - a] = '#';
-          if ((sensor.x + a) >= 0 && (sensor.x + a) < 4000000) entries[sensor.x + a] = '#';
+    for (int y = 0; y < MAX_Y; y++) {
+      final int yy = y;
+      List<Range> ranges = sensors.stream().map(it -> it.getRangeForAbsoluteY(yy))
+          .filter(it -> it.minX >=0).collect(Collectors.toList());
+      int last = 0;
+      int now = ranges.size();
+      while (last != now) {
+        last = ranges.size();
+        List<Range> toMerge = getOverlappingRanges(ranges, ranges.get(0));
+        if (toMerge.size() > 1) {
+          int minX = toMerge.stream().mapToInt(it -> it.minX).min().getAsInt();
+          int maxX = toMerge.stream().mapToInt(it -> it.maxX).max().getAsInt();
+          Range mergedRange = new Range(minX, maxX);
+          ranges.removeAll(toMerge);
+          ranges.add(mergedRange);
+          now = ranges.size();
         }
       }
-      for (int a = 0; a< entries.length; a++) {
-        if (entries[a] != '#') {
-          System.out.println("x= "  + a);
-          System.out.println("y= "  + y);
-          y = 4000000;
-          break;
+      if (ranges.size() > 1) {
+        for (Range range : ranges) {
+          System.out.println(range.minX + " - " + range.maxX);
         }
+        System.out.println("Found in row:" + y);
+        ranges.sort((o1, o2) -> o1.minX - o2.maxX);
+        int x = ranges.get(0).maxX + 1;
+        System.out.println("Found in column: " + x);
+        long result = (long)x * MAX_Y + y;
+        System.out.println();
+        System.out.println("Result: " + result);
+        break;
       }
-      entries = new char[4000000];
-    }
-  }
-
-  public void print() {
-    for (Integer keyY : entries.keySet()) {
-      for (Integer keyX : entries.get(keyY).keySet()) {
-        System.out.print(entries.get(keyY).get(keyX));
-      }
-      System.out.println();
     }
   }
 
